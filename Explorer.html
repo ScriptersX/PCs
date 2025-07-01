@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <title>Pac-X</title>
+
+    <link rel="preload" href="pacman_right_open.png" as="image">
+    <link rel="preload" href="pacman_right_half_closed.png" as="image">
+    <link rel="preload" href="pacman_right_closed.png" as="image">
+
+    <style>
+
+        #loading {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(to right, blue, rgb(0, 217, 255));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #pacx-loading {
+            position: relative;
+            left: 56px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            top: 2px;
+        }
+
+        #pacx {
+            transition: left 0.01s linear;
+        }
+
+        #loading-form-border {
+            border: 5px solid blue;
+            border-radius: 10px;
+            box-shadow: 10px 11px 12px 2px black;
+        }
+
+        #loading-form {
+            background-color: black;
+            border-radius: 4px;
+            padding: 14px 20px 12px 6px;
+            display: flex;
+        }
+
+        #dots {
+            display: flex;
+            gap: 10px;
+            color: white;
+            padding: 0px 0px 0px 40px
+        }
+
+       .loading-dot {
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+        }
+
+        #menu {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: black;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #fondoTitulo {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+
+        #logo {
+            width: 700px;
+            height: auto;
+            position: absolute;
+            top: 10%;
+            left: 40%;
+            transform: translateX(-50%);
+        }
+
+        #logo2 {
+            width: 300px;
+            position: absolute;
+            top: 40%;
+            left: 55%;
+            transform: translateX(50%);
+            transform: rotate(-36deg);
+        }
+
+        #play {
+            position: absolute;
+            top: 60%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+    </style>
+</head>
+<body>
+    <section id="loading">
+        <div id="pacx-loading">
+            <img id="pacx" src="pacman_right_closed.png" alt="Pac-X animado comiendo puntos" style="width: 35px;">
+        </div>
+        <div id="loading-form-border">
+            <div id="loading-form">
+                <div id="dots">
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot"></div>
+                    <div class="loading-dot" id="last-loading-dot"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="menu" style="display: none;">
+        <div id="fondoTituloDiv">
+            <img id="fondoTitulo" src="fondoTitulo.png" alt="Fondo del titulode Pac-X">
+            <div id="logos">        
+                <img id="logo" src="titulo.png" alt="Logo de Pac-X"> 
+                <img id="logo2" src="titulo2.png" alt="Logo de Pac-X">
+            </div>
+        </div>
+        <button id="play">
+            <img src="PlayText.png" alt="Play">
+        </button>
+    </section>
+
+<script>
+    const pacx = document.getElementById('pacx');
+    let estado = 0;
+    let position = 0;
+
+    const imagenes = [
+        'pacman_right_open.png',
+        'pacman_right_half_closed.png',
+        'pacman_right_closed.png'
+    ];
+
+    pacx.style.position = 'relative';
+
+    const dots = document.querySelectorAll('.loading-dot');
+    const loadingSection = document.getElementById('loading');
+
+    const interval = setInterval(() => {
+        pacx.src = imagenes[estado];
+        estado = (estado + 1) % 3;
+
+        position += 5;
+        pacx.style.left = `${position}px`;
+
+        const pacxPosition = pacx.getBoundingClientRect();
+
+        for (const dot of dots) {
+            const dotPosition = dot.getBoundingClientRect();
+
+            const collision =
+                pacxPosition.right > dotPosition.left &&
+                pacxPosition.left < dotPosition.right &&
+                pacxPosition.bottom > dotPosition.top &&
+                pacxPosition.top < dotPosition.bottom;
+
+            if (collision && dot.style.visibility !== 'hidden') {
+                dot.style.visibility = 'hidden';
+                break; 
+            }
+        }
+
+        const allDotsHidden = [...dots].every(dot => dot.style.visibility === 'hidden');
+
+        if (allDotsHidden) {
+            clearInterval(interval);
+            const menu = document.getElementById('menu');
+            if (menu) {
+                menu.style.display = 'block';
+                setTimeout(() => {
+                    loadingSection.style.display = 'none';
+                    document.getElementById('menu').style.display = 'block';
+                }, 200);
+            }
+        }
+    }, 90);
+</script>
+</body>
+</html>
